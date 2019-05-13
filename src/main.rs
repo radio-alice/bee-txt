@@ -12,7 +12,7 @@ use crate::Cmd::Save;
 #[derive(Deserialize)]
 #[serde(tag = "cmd", rename_all = "camelCase")]
 pub enum Cmd {
-    Save { text: String, file_name: String },
+    Save { content: String },
 }
 const INDEX: &str = include_str!("index.html");
 
@@ -34,9 +34,11 @@ fn main() {
 fn handler(_webview: &mut web_view::WebView<'_, ()>, arg: &str )
     -> WVResult {
     match serde_json::from_str(arg).unwrap() {
-        Save { text, file_name } => {
-            let file = PathBuf::from(file_name);
-            let mut save_file = File::create(&file).unwrap();
+        Save { content } => {
+            let split = content.split("\n======\n").collect::<Vec<&str>>();
+            let file_name = PathBuf::from(split[0]);
+            let text = split[1];
+            let mut save_file = File::create(&file_name).unwrap();
             save_file.write_all(text.as_bytes()).unwrap();
         },
     }

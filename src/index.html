@@ -28,18 +28,9 @@
 
       // file saving logic
       if (evtobj.keyCode == 83 && evtobj.metaKey){
-        let content = document.getElementsByTagName('textarea')[0]
-                              .value
-                              .split("\n======\n");
-        let file_name = content[0];
-        let text = content[1];
-        if (text && file_name){
-          let msgJSON = { cmd: 'save', text: text, file_name: file_name };
-          external.invoke(JSON.stringify(msgJSON));
-          console.log(file_name)
-        } else {
-          alert("Can't save without filename above '======''")
-        }
+        let content = document.getElementsByTagName('textarea')[0].value
+        let msgJSON = { cmd: 'save', content: content };
+        external.invoke(JSON.stringify(msgJSON));
       };
     }
     document.onkeydown = KeyPress;
