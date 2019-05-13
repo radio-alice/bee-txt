@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="txt for 🐝's">
+  <title>BEE TXT</title>
+  <style>
+    html, body, textarea {
+      margin: 0;
+      padding: 0;
+    }
+    textarea {
+      width: 100vw;
+      height: 100vh;
+      padding: 10px;
+      border: 0;
+      -webkit-box-sizing: border-box;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+  <script type="text/javascript">
+    function KeyPress(e) {
+      var evtobj = window.event? event : e
+
+      // file saving logic
+      if (evtobj.keyCode == 83 && evtobj.metaKey){
+        let content = document.getElementsByTagName('textarea')[0]
+                              .value
+                              .split("\n======\n");
+        let file_name = content[0];
+        let text = content[1];
+        if (text && file_name){
+          let msgJSON = { cmd: 'save', text: text, file_name: file_name };
+          external.invoke(JSON.stringify(msgJSON));
+          console.log(file_name)
+        } else {
+          alert("Can't save without filename above '======''")
+        }
+      };
+    }
+    document.onkeydown = KeyPress;
+  </script>
+  <textarea name="txt" rows="8" cols="80">
+file_name.txt
+======
+your text here
+  </textarea>
+</body>
+</html>
