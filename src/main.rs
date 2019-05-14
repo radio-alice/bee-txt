@@ -20,7 +20,7 @@ fn main() {
     web_view::builder()
         .title("BEE TXT")
         .content(Content::Html(INDEX))
-        .size(800, 600)
+        .size(500, 600)
         .resizable(true)
         .debug(true)
         .user_data(())

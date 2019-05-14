@@ -10,14 +10,19 @@
     html, body, textarea {
       margin: 0;
       padding: 0;
+      font-family: 'Menlo';
+      background-color: rgb(37, 21,	85);
     }
     textarea {
       width: 100vw;
       height: 100vh;
-      padding: 10px;
+      padding-left: 10px;
+      padding-right: 10px;
+      padding-top: 3px;
       border: 0;
       -webkit-box-sizing: border-box;
       box-sizing: border-box;
+      color: rgb(255, 200, 245);
     }
   </style>
 </head>
@@ -36,9 +41,8 @@
     document.onkeydown = KeyPress;
   </script>
   <textarea name="txt" rows="8" cols="80">
-file_name.txt
+/path/to/file_name.txt
 ======
-your text here
-  </textarea>
+your text here</textarea>
 </body>
 </html>
