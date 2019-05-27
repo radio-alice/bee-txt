@@ -6,18 +6,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="txt for 🐝's">
   <style>
+    :root {
+      --bg: rgb(37, 21,	85);
+      --text: rgb(255, 200, 245);
+      --title: #e4e4e4;
+      --hl: #fff89d;
+    }
     html, body {
+      overflow: hidden;
       margin: 0;
       padding: 0;
-      background-color: rgb(37, 21,	85);
+      background-color: var(--bg) ;
       width: 100%;
       height: 100%;
+    }
+    main {
+      display: flex;
+      height: 97%;
     }
     textarea, #file {
       padding-left: 10px;
       padding-top: 3px;
       font-family: 'Menlo';
-      background-color: rgb(37, 21,	85);
+      background-color: var(--bg);
       border: 0;
     }
     #file {
@@ -25,14 +36,14 @@
       font-weight: bolder;
       padding-right: 5px;
       display: inline-block;
-      color: #e4e4e4;
+      color: var(--title);
     }
     header {
       display: flex;
       flex-direction: row;
     }
     textarea {
-      color: rgb(255, 200, 245);
+      color: var(--text);
       width: 100%;
       height: 100%;
       padding-right: 10px;
@@ -41,6 +52,9 @@
     }
     :focus {
       outline: 0;
+    }
+    ::selection {
+      background-color: var(--hl);
     }
     #unsaved {
       font-size: 11px;
@@ -53,6 +67,7 @@
     var fileIn;
     var contentIn;
     var savedIndicator;
+    var sIupdated = true;
 
     window.onload = () => {
       fileIn = document.querySelector('#file');
@@ -62,25 +77,38 @@
 
     function KeyPress(e) {
       var evtobj = window.event? event : e;
-      // file saving logic
+
+      // send various commands to rust
       if (evtobj.keyCode == 83 && evtobj.metaKey){
         save();
       } else if (evtobj.keyCode == 9) {
         evtobj.preventDefault();
         insertTab(document.activeElement);
       } else if ((evtobj.keyCode == 81 || evtobj.keyCode == 87) && evtobj.metaKey) {
-          quit()
+        external.invoke(JSON.stringify({ cmd: 'quit' }));
+      } else if (evtobj.keyCode == 79 && evtobj.metaKey){
+        external.invoke(JSON.stringify({ cmd: 'open' }));
       }
     }
 
     function save() {
       let file = fileIn.innerText.replace(/ /g,"_");
       let content = contentIn.value;
-      let msgJSON = { cmd: 'save', file: file + ".txt", content: content };
+      let msgJSON = { cmd: 'save', file: file, content: content };
       external.invoke(JSON.stringify(msgJSON));
       savedIndicator.style.display = "none";
+      sIupdated = false;
     }
 
+    function open_file(file, contents){
+      fileIn.innerText = file;
+      contentIn.value = contents;
+      savedIndicator.style.display = "none";
+      sIupdated = false;
+    }
+    function open_error(){
+      alert("file unreadable - sorry :/", "🐝");
+    }
     function insertTab(field){
       let start = field.selectionStart;
       let newPos = start + "    ".length;
@@ -92,19 +120,20 @@
       return false;
     }
 
+    // update save indicator
     function unsave() {
-      savedIndicator.style.display = "block";
+      if (!sIupdated){
+        savedIndicator.style.display = "block";
+      }
+      sIupdated = true;
     }
 
-    function quit() {
-      external.invoke(JSON.stringify({ cmd: 'quit' }));
-    }
   </script>
   <header>
-    <span type="text" id="file" contenteditable="true">note title</span>
+    <span type="text" id="file" contenteditable="true">note title.txt</span>
     <div id="unsaved">🐝</div>
   </header>
-  <textarea rows="8" cols="80" id="content"
-  oninput="unsave()"></textarea>
+  <main><textarea rows="8" cols="80" id="content"
+  oninput="unsave()"></textarea></main>
 </body>
 </html>
