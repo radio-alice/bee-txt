@@ -5,44 +5,106 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="txt for 🐝's">
-  <title>BEE TXT</title>
   <style>
-    html, body, textarea {
+    html, body {
       margin: 0;
       padding: 0;
+      background-color: rgb(37, 21,	85);
+      width: 100%;
+      height: 100%;
+    }
+    textarea, #file {
+      padding-left: 10px;
+      padding-top: 3px;
       font-family: 'Menlo';
       background-color: rgb(37, 21,	85);
+      border: 0;
+    }
+    #file {
+      font-size: 14px;
+      font-weight: bolder;
+      padding-right: 5px;
+      display: inline-block;
+      color: #e4e4e4;
+    }
+    header {
+      display: flex;
+      flex-direction: row;
     }
     textarea {
-      width: 100vw;
-      height: 100vh;
-      padding-left: 10px;
+      color: rgb(255, 200, 245);
+      width: 100%;
+      height: 100%;
       padding-right: 10px;
-      padding-top: 3px;
-      border: 0;
       -webkit-box-sizing: border-box;
       box-sizing: border-box;
-      color: rgb(255, 200, 245);
+    }
+    :focus {
+      outline: 0;
+    }
+    #unsaved {
+      font-size: 11px;
     }
   </style>
 </head>
 <body>
   <script type="text/javascript">
-    function KeyPress(e) {
-      var evtobj = window.event? event : e
+    document.onkeydown = KeyPress;
+    var fileIn;
+    var contentIn;
+    var savedIndicator;
 
+    window.onload = () => {
+      fileIn = document.querySelector('#file');
+      contentIn = document.querySelector('#content');
+      savedIndicator = document.querySelector('#unsaved');
+    }
+
+    function KeyPress(e) {
+      var evtobj = window.event? event : e;
       // file saving logic
       if (evtobj.keyCode == 83 && evtobj.metaKey){
-        let content = document.getElementsByTagName('textarea')[0].value
-        let msgJSON = { cmd: 'save', content: content };
-        external.invoke(JSON.stringify(msgJSON));
-      };
+        save();
+      } else if (evtobj.keyCode == 9) {
+        evtobj.preventDefault();
+        insertTab(document.activeElement);
+      } else if ((evtobj.keyCode == 81 || evtobj.keyCode == 87) && evtobj.metaKey) {
+          quit()
+      }
     }
-    document.onkeydown = KeyPress;
+
+    function save() {
+      let file = fileIn.innerText.replace(/ /g,"_");
+      let content = contentIn.value;
+      let msgJSON = { cmd: 'save', file: file + ".txt", content: content };
+      external.invoke(JSON.stringify(msgJSON));
+      savedIndicator.style.display = "none";
+    }
+
+    function insertTab(field){
+      let start = field.selectionStart;
+      let newPos = start + "    ".length;
+      field.value = field.value.substring(0, start) + "    "
+                    + field.value.substring(start, field.value.length);
+      field.selectionStart = newPos;
+      field.selectionEnd = newPos;
+      field.focus;
+      return false;
+    }
+
+    function unsave() {
+      savedIndicator.style.display = "block";
+    }
+
+    function quit() {
+      external.invoke(JSON.stringify({ cmd: 'quit' }));
+    }
   </script>
-  <textarea name="txt" rows="8" cols="80">
-/path/to/file_name.txt
-======
-your text here</textarea>
+  <header>
+    <span type="text" id="file" contenteditable="true">note title</span>
+    <div id="unsaved">🐝</div>
+  </header>
+  <textarea rows="8" cols="80" id="content"
+  oninput="unsave()"></textarea>
 </body>
 </html>

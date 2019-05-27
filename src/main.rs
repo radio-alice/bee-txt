@@ -7,40 +7,43 @@ use std::fs::File;
 use std::path::PathBuf;
 use std::io::prelude::*;
 use web_view::*;
-use crate::Cmd::Save;
+use crate::Cmd::*;
 
 #[derive(Deserialize)]
 #[serde(tag = "cmd", rename_all = "camelCase")]
 pub enum Cmd {
-    Save { content: String },
+    Save { file: String, content: String },
+    Quit {  },
 }
+
 const INDEX: &str = include_str!("index.html");
 
 fn main() {
-    web_view::builder()
-        .title("BEE TXT")
+    let mut webview = web_view::builder()
+        .title("")
         .content(Content::Html(INDEX))
         .size(500, 600)
         .resizable(true)
         .debug(true)
         .user_data(())
-        .invoke_handler(|webview, arg| {
+        .invoke_handler(|webview, arg|  {
             handler(webview, arg)
         })
-        .run()
-        .unwrap()
+        .build()
+        .unwrap();
+
+    webview.set_color((37,21,85));
+    webview.run().unwrap();
 }
 
 fn handler(_webview: &mut web_view::WebView<'_, ()>, arg: &str )
     -> WVResult {
     match serde_json::from_str(arg).unwrap() {
-        Save { content } => {
-            let split = content.split("\n======\n").collect::<Vec<&str>>();
-            let file_name = PathBuf::from(split[0]);
-            let text = split[1];
-            let mut save_file = File::create(&file_name).unwrap();
-            save_file.write_all(text.as_bytes()).unwrap();
+        Save { file, content } => {
+            let mut save_file = File::create(&file).unwrap();
+            save_file.write_all(content.as_bytes()).unwrap();
         },
+        Quit {} => std::process::exit(0x0100),
     }
     Ok(())
 }
