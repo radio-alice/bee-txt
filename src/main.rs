@@ -7,6 +7,8 @@ extern crate config;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufReader;
+use std::env;
+use std::path::PathBuf;
 use web_view::*;
 use crate::Cmd::*;
 
@@ -14,12 +16,9 @@ use crate::Cmd::*;
 #[serde(tag = "cmd", rename_all = "camelCase")]
 pub enum Cmd {
     Save { file: String, content: String },
-    Css { },
     Quit { },
     Open { },
 }
-
-//const INDEX: &str = include_str!("index.html");
 
 fn main() {
     let (bg_color, css_colors) = get_colors();
@@ -94,7 +93,7 @@ font-size: 11px;
         .content(Content::Html(html))
         .size(500, 600)
         .resizable(true)
-        .debug(true)
+        .debug(false)
         .user_data(())
         .invoke_handler(|webview, arg|  {
             handler(webview, arg)
@@ -136,15 +135,19 @@ fn handler(webview: &mut web_view::WebView<'_, ()>, arg: &str )
             let mut save_file = File::create(&file).unwrap();
             save_file.write_all(content.as_bytes()).unwrap();
         },
-        Quit {} => std::process::exit(0x0100),
-        Css {} => webview.eval(&format!("inject_css({})",&get_colors().1)).unwrap(),
+        Quit { } => std::process::exit(0x0100),
     }
     Ok(())
 }
 
 fn get_colors() -> (Vec<u8>, String)  {
     let mut colors = config::Config::default();
-    colors.merge(config::File::with_name("colors")).unwrap();
+    let mut colors_path = PathBuf::from(&env::current_exe().unwrap())
+                                    .parent().unwrap()
+                                    .parent().unwrap()
+                                    .to_path_buf();
+    colors_path.push("Resources/colors.toml");
+    colors.merge(config::File::from(colors_path)).unwrap();
     let text_color = colors.get_str("text").unwrap();
     let title_color = colors.get_str("title").unwrap();
     let hl_color = colors.get_str("hl").unwrap();
