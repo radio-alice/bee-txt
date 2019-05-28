@@ -3,6 +3,4 @@
 *.txt
 .DS_Store
 
-/node_modules
-/.cache
-/dist
+*.html
